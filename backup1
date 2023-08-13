@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Customer List</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container" id="customerList">
+        <h1 class="mt-4">Customer List</h1>
+        <button class="btn btn-primary mt-2 mb-2" data-toggle="modal" data-target="#addCustomerModal">Add Customer</button>
+
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Nama</th>
+                    <th>Jenis Kelamin</th>
+                    <th>Tanggal Lahir</th>
+                    <th>Pekerjaan</th>
+                    <th>Provinsi</th>
+                    <th>Kab/Kota</th>
+                    <th>Kecamatan</th>
+                    <th>Desa</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($customers as $customer): ?>
+                    <tr>
+                        <td><?php echo $customer['nama']; ?></td>
+                        <td><?php echo $customer['jenis_kelamin']; ?></td>
+                        <td><?php echo $customer['tanggal_lahir']; ?></td>
+                        <td><?php echo $customer['pekerjaan']; ?></td>
+                        <td><?php echo $customer['provinsi']; ?></td>
+                        <td><?php echo $customer['kab_kota']; ?></td>
+                        <td><?php echo $customer['kecamatan']; ?></td>
+                        <td><?php echo $customer['desa']; ?></td>
+                        <td>
+                            <button class="btn btn-sm btn-warning editCustomerBtn"
+                                    data-id="<?php echo $customer['id']; ?>"
+                                    data-nama="<?php echo $customer['nama']; ?>"
+                                    data-jenis_kelamin="<?php echo $customer['jenis_kelamin']; ?>"
+                                    data-tanggal_lahir="<?php echo $customer['tanggal_lahir']; ?>"
+                                    data-pekerjaan="<?php echo $customer['pekerjaan']; ?>"
+                                    data-provinsi="<?php echo $customer['provinsi']; ?>"
+                                    data-kab_kota="<?php echo $customer['kab_kota']; ?>"
+                                    data-kecamatan="<?php echo $customer['kecamatan']; ?>"
+                                    data-desa="<?php echo $customer['desa']; ?>"
+                            >Edit</button>
+                            <a href="<?php echo base_url('customer/delete/' . $customer['id']); ?>" class="btn btn-sm btn-danger">Delete</a>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Add Customer Modal -->
+    <div class="modal fade" id="addCustomerModal" tabindex="-1" role="dialog" aria-labelledby="addCustomerModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addCustomerModalLabel">Add Customer</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Add Customer Form -->
+                    <form id="addCustomerForm">
+                        <div class="form-group">
+                            <label>Nama:</label>
+                            <input type="text" class="form-control" name="nama" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Jenis Kelamin:</label>
+                            <select class="form-control" name="jenis_kelamin" required>
+                                <option value="">Pilih Jenis Kelamin</option>
+                                <option value="Laki-laki">Laki-laki</option>
+                                <option value="Perempuan">Perempuan</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Tanggal Lahir:</label>
+                            <input type="date" class="form-control" name="tanggal_lahir" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Pekerjaan:</label>
+                            <input type="text" class="form-control" name="pekerjaan" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Provinsi:</label>
+                            <select class="form-control" id="addProvinsiSelect" name="provinsi" required>
+                                <option value="">Pilih Provinsi</option>
+                                <!-- Options for provinces will be dynamically added here -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Kabupaten / Kota:</label>
+                            <select class="form-control" id="addKabKotaSelect" name="kab_kota" required>
+                                <!-- Options for kabupaten/kota will be dynamically added here -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Kecamatan:</label>
+                            <select class="form-control" id="addKecamatanSelect" name="kecamatan" required>
+                                <!-- Options for kecamatan will be dynamically added here -->
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Desa:</label>
+                            <select class="form-control" id="addDesaSelect" name="desa" required>
+                                <!-- Options for desa will be dynamically added here -->
+                            </select>
+                        </div>
+                        <button id="submitAddCustomerForm" type="button" class="btn btn-primary">Add</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Customer Modal -->
+    <div class="modal fade" id="editCustomerModal" tabindex="-1" role="dialog" aria-labelledby="editCustomerModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editCustomerModalLabel">Edit Customer</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <!-- Edit Customer Form -->
+                    <form id="editCustomerForm" method="post">
+                        <input type="hidden" id="editCustomerId" name="id" value="">
+                        <div class="form-group">
+                            <label>Nama:</label>
+                            <input type="text" class="form-control" id="editNama" name="nama" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Jenis Kelamin:</label>
+                            <select class="form-control" id="editJenisKelamin" name="jenis_kelamin" required>
+                                <option value="Laki-laki">Laki-laki</option>
+                                <option value="Perempuan">Perempuan</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Tanggal Lahir:</label>
+                            <input type="date" class="form-control" id="editTanggalLahir" name="tanggal_lahir" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Pekerjaan:</label>
+                            <input type="text" class="form-control" id="editPekerjaan" name="pekerjaan" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Provinsi:</label>
+                            <input type="text" class="form-control" id="editProvinsi" name="provinsi" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Kabupaten / Kota:</label>
+                            <input type="text" class="form-control" id="editKab_Kota" name="kab_kota" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Kecamatan:</label>
+                            <input type="text" class="form-control" id="editKecamatan" name="kecamatan" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Desa:</label>
+                            <input type="text" class="form-control" id="editDesa" name="desa" required>
+                        </div>
+                        <button id="submitEditCustomerForm" type="button" class="btn btn-primary">Update</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Include Bootstrap JS and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Inside your HTML -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+</body>
+<script>
+// Fetch province data
+fetch("https://kanglerian.github.io/api-wilayah-indonesia/api/provinces.json")
+    .then(response => response.json())
+    .then(data => {
+        const addProvinsiSelect = document.getElementById("addProvinsiSelect");
+        data.forEach(province => {
+            addProvinsiSelect.appendChild(new Option(province.name, province.id));
+        });
+    })
+    .catch(error => console.error("Error fetching province data:", error));
+
+// Event listener for province selection
+addProvinsiSelect.addEventListener("change", function() {
+    const selectedProvinceId = this.value;
+    // Fetch kabupaten/kota data based on the selected province
+    fetch(`https://kanglerian.github.io/api-wilayah-indonesia/api/regencies/${selectedProvinceId}.json`)
+        .then(response => response.json())
+        .then(data => {
+            const addKabKotaSelect = document.getElementById("addKabKotaSelect");
+            addKabKotaSelect.innerHTML = "";
+            data.forEach(regency => {
+                addKabKotaSelect.appendChild(new Option(regency.name, regency.id));
+            });
+        })
+        .catch(error => console.error("Error fetching kabupaten/kota data:", error));
+});
+
+// Event listener for kabupaten/kota selection
+addKabKotaSelect.addEventListener("change", function() {
+    const selectedRegencyId = this.value;
+    // Fetch sub-district data based on the selected kabupaten/kota
+    fetch(`https://kanglerian.github.io/api-wilayah-indonesia/api/districts/${selectedRegencyId}.json`)
+        .then(response => response.json())
+        .then(data => {
+            const addKecamatanSelect = document.getElementById("addKecamatanSelect");
+            addKecamatanSelect.innerHTML = "";
+            data.forEach(district => {
+                addKecamatanSelect.appendChild(new Option(district.name, district.id));
+            });
+        })
+        .catch(error => console.error("Error fetching kecamatan data:", error));
+});
+
+// Event listener for kecamatan selection
+addKecamatanSelect.addEventListener("change", function() {
+    const selectedDistrictId = this.value;
+    // Fetch sub-district data based on the selected kecamatan
+    fetch(`https://kanglerian.github.io/api-wilayah-indonesia/api/subdistricts/${selectedDistrictId}.json`)
+        .then(response => response.json())
+        .then(data => {
+            const addDesaSelect = document.getElementById("addDesaSelect");
+            addDesaSelect.innerHTML = "";
+            data.forEach(subdistrict => {
+                addDesaSelect.appendChild(new Option(subdistrict.name, subdistrict.id));
+            });
+        })
+        .catch(error => console.error("Error fetching desa data:", error));
+});
+
+
+// Event listener for sub-district selection
+addKecamatanSelect.addEventListener("change", function() {
+    const selectedSubDistrictId = this.value;
+    // Fetch village data based on the selected sub-district
+    fetch(`https://kanglerian.github.io/api-wilayah-indonesia/api/villages/${selectedSubDistrictId}.json`)
+        .then(response => response.json())
+        .then(data => {
+            const addDesaSelect = document.getElementById("addDesaSelect");
+            addDesaSelect.innerHTML = "";
+            data.forEach(village => {
+                addDesaSelect.appendChild(new Option(village.name, village.id));
+            });
+        })
+        .catch(error => console.error("Error fetching village data:", error));
+});
+
+$(document).ready(function() {
+    $("#submitAddCustomerForm").click(function() {
+        $.ajax({
+            type: "POST",
+            url: "<?php echo base_url('customer/add'); ?>",
+            data: {
+                nama: $("input[name='nama']").val(),
+                jenis_kelamin: $("select[name='jenis_kelamin']").val(),
+                tanggal_lahir: $("input[name='tanggal_lahir']").val(),
+                pekerjaan: $("input[name='pekerjaan']").val(),
+                provinsi: $("select[name='provinsi']").find("option:selected").text(), // Mengambil teks opsi terpilih
+                kab_kota: $("select[name='kab_kota']").find("option:selected").text(),
+                kecamatan: $("select[name='kecamatan']").find("option:selected").text(),
+                desa: $("select[name='desa']").find("option:selected").text()
+            },
+            success: function(response) {
+                // Close the modal using JavaScript
+                $("#addCustomerModal").modal("hide");
+                // Reload the page
+                location.reload();
+            }
+        });
+    });
+});
+// Edit Customer
+$(".editCustomerBtn").click(function() {
+        var id = $(this).data("id");
+        var nama = $(this).data("nama");
+        var jenis_kelamin = $(this).data("jenis_kelamin");
+        var tanggal_lahir = $(this).data("tanggal_lahir");
+        var pekerjaan = $(this).data("pekerjaan");
+        var provinsi = $(this).data("provinsi");
+        var kab_kota = $(this).data("kab_kota");
+        var kecamatan = $(this).data("kecamatan");
+        var desa = $(this).data("desa");
+
+        $("#editCustomerId").val(id);
+        $("#editNama").val(nama);
+        $("#editJenisKelamin").val(jenis_kelamin);
+        $("#editTanggalLahir").val(tanggal_lahir);
+        $("#editPekerjaan").val(pekerjaan);
+        $("#editProvinsi").val(provinsi);
+        $("#editKab_Kota").val(kab_kota);
+        $("#editKecamatan").val(kecamatan);
+        $("#editDesa").val(desa);
+        // Open the edit modal
+        $("#editCustomerModal").modal("show");
+    });
+
+    // Submit Edit Customer Form
+    $("#submitEditCustomerForm").click(function() {
+        var id = $("#editCustomerId").val();
+        $.ajax({
+            type: "POST",
+            url: "<?php echo base_url('customer/edit'); ?>/" + id,
+            data: $("#editCustomerForm").serialize(),
+            success: function(response) {
+                // Close the modal using JavaScript
+                $("#editCustomerModal").modal("hide");
+                // Reload the page
+                location.reload();
+            }
+        });
+    });
+
+</script>
+</html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Customer</title>
+    <!-- Include Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container" id="editCustomer">
+        <h1 class="mt-4">Edit Customer</h1>
+
+        <form id="editCustomerForm">
+            <div class="form-group">
+                <label>Nama:</label>
+                <input type="text" class="form-control" name="nama" value="<?php echo $customer['nama']; ?>" required>
+            </div>
+            <div class="form-group">
+                <label>Jenis Kelamin:</label>
+                <select class="form-control" name="jenis_kelamin" required>
+                    <option value="Laki-laki" <?php if ($customer['jenis_kelamin'] === 'Laki-laki') echo 'selected'; ?>>Laki-laki</option>
+                    <option value="Perempuan" <?php if ($customer['jenis_kelamin'] === 'Perempuan') echo 'selected'; ?>>Perempuan</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Tanggal Lahir:</label>
+                <input type="date" class="form-control" name="tanggal_lahir" value="<?php echo $customer['tanggal_lahir']; ?>" required>
+            </div>
+            <div class="form-group">
+                <label>Pekerjaan:</label>
+                <input type="text" class="form-control" name="pekerjaan" value="<?php echo $customer['pekerjaan']; ?>" required>
+            </div>
+            <div class="form-group">
+                <label>Provinsi:</label>
+                <select class="form-control" id="editProvinsiSelect" name="provinsi" required>
+                    <!-- Options for provinces will be dynamically added here -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Kabupaten / Kota:</label>
+                <select class="form-control" id="editKabKotaSelect" name="kab_kota" required>
+                    <!-- Options for kabupaten/kota will be dynamically added here -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Kecamatan:</label>
+                <select class="form-control" id="editKecamatanSelect" name="kecamatan" required>
+                    <!-- Options for kecamatan will be dynamically added here -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Desa:</label>
+                <select class="form-control" id="editDesaSelect" name="desa" required>
+                    <!-- Options for desa will be dynamically added here -->
+                </select>
+            </div>
+            <input type="hidden" name="customer_id" value="<?php echo $customer['id']; ?>">
+            <button id="submitEditCustomerForm" type="button" class="btn btn-primary">Update</button>
+        </form>
+    </div>
+
+    <!-- Include Bootstrap JS and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Inside your HTML -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            // Fetch province data
+            fetch("https://kanglerian.github.io/api-wilayah-indonesia/api/provinces.json")
+                .then(response => response.json())
+                .then(data => {
+                    const editProvinsiSelect = document.getElementById("editProvinsiSelect");
+                    data.forEach(province => {
+                        editProvinsiSelect.appendChild(new Option(province.name, province.id));
+                    });
+
+                    // Set the selected province based on customer's current provinsi
+                    editProvinsiSelect.value = "<?php echo $customer['provinsi']; ?>";
+
+                    // Trigger change event to populate kabupaten/kota dropdown
+                    editProvinsiSelect.dispatchEvent(new Event("change"));
+                })
+                .catch(error => console.error("Error fetching province data:", error));
+
+            // Event listener for province selection
+            editProvinsiSelect.addEventListener("change", function() {
+                const selectedProvinceId = this.value;
+                // Fetch kabupaten/kota data based on the selected province
+                fetch(`https://kanglerian.github.io/api-wilayah-indonesia/api/regencies/${selectedProvinceId}.json`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const editKabKotaSelect = document.getElementById("editKabKotaSelect");
+                        editKabKotaSelect.innerHTML = "";
+                        data.forEach(regency => {
+                            editKabKotaSelect.appendChild(new Option(regency.name, regency.id));
+                        });
+
+                        // Set the selected kabupaten/kota based on customer's current kab_kota
+                        editKabKotaSelect.value = "<?php echo $customer['kab_kota']; ?>";
+
+                        // Trigger change event to populate kecamatan dropdown
+                        editKabKotaSelect.dispatchEvent(new Event("change"));
+                    })
+                    .catch(error => console.error("Error fetching kabupaten/kota data:", error));
+            });
+
+            // Event listener for kabupaten/kota selection
+            editKabKotaSelect.addEventListener("change", function() {
+                const selectedRegencyId = this.value;
+                // Fetch kecamatan data based on the selected kabupaten/kota
+                fetch(`https://kanglerian.github.io/api-wilayah-indonesia/api/districts/${selectedRegencyId}.json`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const editKecamatanSelect = document.getElementById("editKecamatanSelect");
+                        editKecamatanSelect.innerHTML = "";
+                        data.forEach(district => {
+                            editKecamatanSelect.appendChild(new Option(district.name, district.id));
+                        });
+
+                        // Set the selected kecamatan based on customer's current kecamatan
+                        editKecamatanSelect.value = "<?php echo $customer['kecamatan']; ?>";
+
+                        // Trigger change event to populate desa dropdown
+                        editKecamatanSelect.dispatchEvent(new Event("change"));
+                    })
+                    .catch(error => console.error("Error fetching kecamatan data:", error));
+            });
+
+            // Event listener for kecamatan selection
+            editKecamatanSelect.addEventListener("change", function() {
+                const selectedDistrictId = this.value;
+                // Fetch desa data based on the selected kecamatan
+                fetch(`https://kanglerian.github.io/api-wilayah-indonesia/api/subdistricts/${selectedDistrictId}.json`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const editDesaSelect = document.getElementById("editDesaSelect");
+                        editDesaSelect.innerHTML = "";
+                        data.forEach(subdistrict => {
+                            editDesaSelect.appendChild(new Option(subdistrict.name, subdistrict.id));
+                        });
+
+                        // Set the selected desa based on customer's current desa
+                        editDesaSelect.value = "<?php echo $customer['desa']; ?>";
+                    })
+                    .catch(error => console.error("Error fetching desa data:", error));
+            });
+
+            $("#submitEditCustomerForm").click(function() {
+                $.ajax({
+                    type: "POST",
+                    url: "<?php echo base_url('customer/edit/' . $customer['id']); ?>",
+                    data: $("#editCustomerForm").serialize(),
+                    success: function(response) {
+                        // Redirect to the customer list page upon successful update
+                        window.location.href = "<?php echo base_url('customer'); ?>";
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
